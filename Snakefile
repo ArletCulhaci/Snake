@@ -10,7 +10,7 @@ Latest modification:
 configfile: "configure.yaml"
 
 rule dempulitplex_filter:
-    input:  "ata/sub_forward.fq.gz", "ata/sub_reverse.fq.gz"
+    input:  "data/sub_forward.fq.gz", "data/sub_reverse.fq.gz"
     output: directory("/snake")
     #threads: CLUSTER["align"]["cpu"]
     params:
