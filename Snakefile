@@ -10,8 +10,8 @@ Latest modification:
 configfile: "configure.yaml"
 
 rule dempulitplex_filter:
-    input:  "/media/biolinux/Data/Astrid_RADseq_data/sub_forward.fq.gz", "/media/biolinux/Data/Astrid_RADseq_data/sub_reverse.fq.gz"
-    output: directory("/home/biolinux/Desktop/snake")
+    input:  "ata/sub_forward.fq.gz", "ata/sub_reverse.fq.gz"
+    output: directory("/snake")
     #threads: CLUSTER["align"]["cpu"]
     params:
             #jobname = "{sample}",
@@ -41,4 +41,4 @@ rule dempulitplex_filter:
     #            process_radtags -f {input[0]} -b {configure[barcodes]} -o {output} -e sbfI -r -c -q
     #            """)
 rule all:
-    input: directory("/home/biolinux/Desktop/snake")
+    input: directory("/snake")
