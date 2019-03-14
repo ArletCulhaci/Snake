@@ -2,11 +2,15 @@
 What does this software do in simple words?
 What are the expected outputs?
 
-### Prerequisites
+### Getting Started/Requirements/Prerequisites/Dependencies
 This Snakemake pipeline make use of the [conda package manager](https://docs.conda.io/en/latest/) to install softwares and dependencies.
 1. First, make sure you have conda installed on your system. Use [Miniconda3](https://docs.conda.io/en/latest/miniconda.html) and follow the [installation instructions](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).  
 2. Using `conda`, create a virtual environment called `snakemake` to install Snakemake (version 5.4.3 or higher) by executing the following code in a Shell window: `conda create --name snakemake -c bioconda snakemake=5.4.3`. This will install `snakemake version 5.4.3` in a new environment called __snakemake__.
-3. You can now run the pipeline (see below) since snakemake will use conda to install softwares and packages for each rule.  
+3. You can now run the pipeline since snakemake will use conda to install softwares and packages for each rule.
+
+### Dry and real runs
+For a dry run, type: `snakemake --use-conda -np`  
+For a real run type: `snakemake --use-conda`  
 
 
 # For improvement: a template for your README file
