@@ -1,8 +1,7 @@
 paired: true
-reference: /media/biolinux/Data/Astrid_RADseq_data/ref_genome_HV/HV_genome_6_dec
+reference: data/outfile-HvPacBioContigs-SpIDadded.sub.fa
 samples:
-    forward: /media/biolinux/Data/Astrid_RADseq_data/sub_forward.fq.gz
-    reverse: /media/biolinux/Data/Astrid_RADseq_data/sub_reverse.fq.gz
-barcodes: /media/biolinux/Data/Astrid_RADseq_data/barcodes.csv
+    forward: data/sub_forward.fq.gz
+    reverse: data/sub_reverse.fq.gz
+barcodes: barcodes.csv
 popmap: /media/biolinux/Data/Astrid_RADseq_data/Popmap_4_dec.txt
-
