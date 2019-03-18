@@ -13,11 +13,20 @@ min_version("5.4.3")
 
 configfile: "configure.yaml"
 
+SAMPLES = []
+
+f = open( config["barcodes"], 'rU' ) #open the file in read universal mode
+for line in f:
+    cells = line.split( "\t" )
+    SAMPLES.append(cells[1].rstrip("\n")) #since we want the first, second and third column
+f.close()
+
 ################
 # Desired output
 ################
 rule all:
-    input: directory("calc/initial_reads.pdf")
+    input: expand("results/{sample}.bam", sample=SAMPLES)
+    #input: directory("results/{sample}.bam")
 #######
 # Rules
 #######
@@ -82,3 +91,28 @@ rule vis_reads:
         "envs/ggplot2.yaml"
     shell:
         "Rscript initial_reads_IBEDs_pipeline.R {input} {output}"
+
+glob_wildcards('results/{sample}.fq.gz')
+
+if config["paired"]:
+    rule bowtie2_align_pe:
+        input:
+            glob_wildcards('results/{sample}.fq.gz').example
+            #"results/{}"
+        output:
+            directory("results/{sample}.bam")
+        #threads: CLUSTER["align"]["cpu"]
+        #conda:
+        #    "envs/stacks.yaml"
+        params:
+            reference = config["reference"]
+        log:
+            "results/"
+        shell:
+          "bowtie2  -p 20 -x  {params.reference} -1 results/{sample}.1.fq.gz -2 results/{samples}.2.fq.gz -S {output}"
+          #samtools view -Sb ${5}/"STACKS_$DATE-$N/alignment"/${names}.sam > ${5}/"STACKS_$DATE-$N/alignment"/${names}.bam
+          #samtools sort ${5}/"STACKS_$DATE-$N/alignment"/${names}.bam ${5}/"STACKS_$DATE-$N/alignment"/${names}
+          #samtools index ${5}/"STACKS_$DATE-$N/alignment"/${names}.bam
+
+else:
+    rule bowtie2_align_se:
