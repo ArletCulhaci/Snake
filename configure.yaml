@@ -1,7 +1,7 @@
-paired: true
+paired: false
 reference: data/outfile-HvPacBioContigs-SpIDadded.sub.fa
 samples:
     forward: data/sub_forward.fq.gz
-    reverse: data/sub_reverse.fq.gz
 barcodes: barcodes.csv
 popmap: /media/biolinux/Data/Astrid_RADseq_data/Popmap_4_dec.txt
+num_ind: 52
