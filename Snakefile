@@ -9,23 +9,34 @@ Latest modification:
 """
 from snakemake.utils import min_version
 min_version("5.4.3")
+import pandas as pd # to read barcode to sample correspondence
 
 
 configfile: "configure.yaml"
 
-SAMPLES = []
 
-f = open( config["barcodes"], 'rU' ) #open the file in read universal mode
-for line in f:
-    cells = line.split( "\t" )
-    SAMPLES.append(cells[1].rstrip("\n")) #since we want the first, second and third column
-f.close()
+############################################
+# Get the sample names from the barcode file
+############################################
+SAMPLES = config["samples"]
+
+barcodes = pd.read_csv("barcodes.tsv",delimiter="\t",header='infer') # imports the barcodes as a Pandas dataframe
+SAMPLES = barcodes["sample"].to_list()
+#f = open( config["barcodes"], 'rU' ) #open the file in read universal mode
+#for line in f:
+#    cells = line.split( "\t" )
+#    SAMPLES.append(cells[1].rstrip("\n")) #since we want the first, second and third column
+#f.close()
+
+
+
 
 ################
 # Desired output
 ################
 rule all:
-    input: expand("results/{sample}.bam", sample=SAMPLES)
+    input:
+        expand("results/{sample}.bam", sample=SAMPLES)
     #input: directory("results/{sample}.bam")
 #######
 # Rules
@@ -97,10 +108,10 @@ glob_wildcards('results/{sample}.fq.gz')
 if config["paired"]:
     rule bowtie2_align_pe:
         input:
-            glob_wildcards('results/{sample}.fq.gz').example
-            #"results/{}"
+            forward = ["samples"][wildcards.sample]["forward"], # here I use an annymous input function to infer the wildcard sample
+            reverse = lambda wildcards: config["samples"][wildcards.sample]["reverse"]
         output:
-            directory("results/{sample}.bam")
+            "results/{sample}.bam"
         #threads: CLUSTER["align"]["cpu"]
         #conda:
         #    "envs/stacks.yaml"
@@ -109,7 +120,7 @@ if config["paired"]:
         log:
             "results/"
         shell:
-          "bowtie2  -p 20 -x  {params.reference} -1 results/{sample}.1.fq.gz -2 results/{samples}.2.fq.gz -S {output}"
+          "bowtie2  -p 20 -x  {params.reference} -1 {input.forward} -2 {input.reverse} -S {output}"
           #samtools view -Sb ${5}/"STACKS_$DATE-$N/alignment"/${names}.sam > ${5}/"STACKS_$DATE-$N/alignment"/${names}.bam
           #samtools sort ${5}/"STACKS_$DATE-$N/alignment"/${names}.bam ${5}/"STACKS_$DATE-$N/alignment"/${names}
           #samtools index ${5}/"STACKS_$DATE-$N/alignment"/${names}.bam
