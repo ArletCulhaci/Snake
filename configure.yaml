@@ -1,9 +1,11 @@
+temp_dir: "scratch/"    # will be removed upon pipeline completion
+result_dir: "results/"  # files here will be kept
 paired: false
-reference: data/outfile-HvPacBioContigs-SpIDadded.sub.fa
-samples:
-  test:
+genome: data/outfile-HvPacBioContigs-SpIDadded.sub.fa
+fastq:
     forward: data/sub_forward.fq.gz
     reverse: data/sub_reverse.fq.gz
+restriction_enzyme: sbfI
 barcodes: barcodes.tsv
 popmap: /media/biolinux/Data/Astrid_RADseq_data/Popmap_4_dec.txt
 num_ind: 52
