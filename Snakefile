@@ -32,10 +32,9 @@ SAMPLES = barcodes["sample"].to_list()
 ################
 rule all:
     input:
-        expand(RESULT_DIR + "{sample}.bam", sample=SAMPLES)
+        expand(RESULT_DIR + "{sample}.vcf", sample=SAMPLES)
     message:"All done! Removing {TEMP_DIR} directory"
-    shell:
-        "rm -r {TEMP_DIR}"
+    #shell: "rm -r {TEMP_DIR}"
 
 #######
 # Rules
@@ -116,7 +115,7 @@ rule bowtie2_align_pe:
         reverse = TEMP_DIR + "fastq/{sample}.2.fq",
         index = [TEMP_DIR + "genome." + str(i) + ".bt2" for i in range(1,5)]
     output:
-        RESULT_DIR + "{sample}.bam"
+        TEMP_DIR + "{sample}.bam"
     conda:
         "envs/bowtie2.yaml"
     threads: 10
@@ -129,4 +128,34 @@ rule bowtie2_align_pe:
         "bowtie2 -p {threads} "
         "-x  {params.index_name} "
         "-1 {input.forward} -2 {input.reverse} "
-        "-S - | samtools view -Sb -F 4 -o {output} " # takes standard input and converts on the fly to .bam format (removes unmapped)
+        "-S - 2>{log}| samtools view -Sb -F 4 -o {output} " # takes standard input and converts on the fly to .bam format (removes unmapped)
+
+rule sort_bam:
+    input:
+        TEMP_DIR + "{sample}.bam"
+    output:
+        TEMP_DIR + "{sample}.sorted.bam"
+    message:"sorting {wildcards.sample} .bam file"
+    conda:
+        "envs/samtools.yaml"
+    shell:
+        "samtools sort -o {output} {input}"
+
+
+rule call_variants:
+    input:
+        bam = TEMP_DIR + "{sample}.sorted.bam"
+    output:
+        RESULT_DIR + "{sample}.vcf"
+    message:"calling variants for {wildcards.sample} with freebayes"
+    conda:
+        "envs/freebayes.yaml"
+    params:
+        genome = config["genome"],
+        min_alternate_count = config["freebayes"]["min-alternate-count"]
+    shell:
+        "samtools index {input};" # first index sorted bam file
+        "freebayes --fasta-reference {params.genome} "
+        "{input.bam} "
+        "--min-alternate-count {params.min_alternate_count} "
+        "--vcf {output} "
