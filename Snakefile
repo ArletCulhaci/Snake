@@ -32,7 +32,8 @@ SAMPLES = barcodes["sample"].to_list()
 ################
 rule all:
     input:
-        expand(RESULT_DIR + "{sample}.vcf", sample=SAMPLES)
+        VCFs = expand(RESULT_DIR + "{sample}.vcf", sample=SAMPLES),
+        ALL_VCF = RESULT_DIR + "all.vcf"
     message:"All done! Removing {TEMP_DIR} directory"
     #shell: "rm -r {TEMP_DIR}"
 
@@ -159,3 +160,38 @@ rule call_variants:
         "{input.bam} "
         "--min-alternate-count {params.min_alternate_count} "
         "--vcf {output} "
+
+rule compress_vcf:
+    input:
+        RESULT_DIR + "{sample}.vcf"
+    output:
+        RESULT_DIR + "{sample}.vcf.gz"
+    message:"compressing {wildcards.sample} VCF file"
+    conda:
+        "envs/bcftools.yaml"
+    shell:
+        "bcftools view {input} -Oz -o {output}"
+        #"bcftools view --output-file {output} {input}"
+
+rule index_vcf:
+    input:
+        RESULT_DIR + "{sample}.vcf.gz"
+    output:
+        RESULT_DIR + "{sample}.vcf.gz.tbi"
+    message:"indexing {wildcards.sample} vcf file"
+    conda:
+        "envs/tabix.yaml"
+    shell:
+        "tabix {input}"
+
+rule merge_variants:
+    input:
+        vcf = expand(RESULT_DIR + "{sample}.vcf.gz",sample=SAMPLES),
+        index = expand(RESULT_DIR + "{sample}.vcf.gz.tbi",sample=SAMPLES)
+    output:
+        RESULT_DIR + "all.vcf"
+    message:"merging VCF files"
+    conda:
+        "envs/bcftools.yaml"
+    shell:
+        "bcftools merge --output {output} {input.vcf}"
