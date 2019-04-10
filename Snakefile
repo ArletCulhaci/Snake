@@ -194,4 +194,4 @@ rule merge_variants:
     conda:
         "envs/bcftools.yaml"
     shell:
-        "bcftools merge --output {output} {input.vcf}"
+        "bcftools concat --output {output} {input.vcf}"
